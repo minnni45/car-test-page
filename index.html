@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>太鍍車體工藝 - 車漆科學診斷系統</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+        
+        body {
+            background-color: #ffffff;
+            font-family: 'Noto Sans TC', sans-serif;
+            color: #000000;
+        }
+        .step-content { display: none; }
+        .step-content.active { display: block; }
+        
+        .option-card {
+            border: 1px solid #e5e5e5;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .option-card:hover {
+            border-color: #000000;
+        }
+        .option-card.selected {
+            background-color: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        #custom-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-white min-h-screen flex flex-col items-center py-10 px-4">
+
+    <!-- 訊息彈窗 -->
+    <div id="custom-modal" onclick="closeModal()">
+        <div class="bg-white p-10 max-w-sm w-full text-center rounded-sm mx-4" onclick="event.stopPropagation()">
+            <h3 class="text-xl font-black mb-4 tracking-widest">系統訊息</h3>
+            <p id="modal-text" class="text-gray-600 mb-8 leading-relaxed"></p>
+            <button onclick="closeModal()" class="w-full py-4 bg-black text-white font-bold uppercase tracking-widest text-xs">確認</button>
+        </div>
+    </div>
+
+    <div class="w-full max-w-3xl">
+        <!-- Header -->
+        <div class="mb-12 text-center">
+            <h1 class="text-3xl font-black tracking-tighter uppercase mb-2">太鍍車體工藝</h1>
+            <div class="flex items-center justify-center gap-4 text-[10px] tracking-[0.2em] text-gray-400 font-bold uppercase">
+                <span>車漆科學診斷系統 paint diagnostic system</span>
+                <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                <span id="step-counter">第 1 / 5 步</span>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-100 h-[2px] mb-12 relative">
+            <div id="progress-line" class="absolute top-0 left-0 bg-black h-[2px] transition-all duration-500" style="width: 20%"></div>
+        </div>
+
+        <form id="diagnosticForm" class="bg-white">
+            
+            <!-- STEP 1: 客戶與車輛 -->
+            <div id="step1" class="step-content active fade-in">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold border-l-4 border-black pl-4">客戶與車輛資料 <span class="text-xs font-normal text-gray-400 ml-2">owner & vehicle information</span></h2>
+                </div>
+                
+                <div class="grid grid-cols-1 gap-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="group">
+                            <label class="text-xs font-bold text-gray-400 block mb-2">車主姓名 owner name</label>
+                            <input type="text" placeholder="輸入姓名" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-colors">
+                        </div>
+                        <div class="group">
+                            <label class="text-xs font-bold text-gray-400 block mb-2">手機號碼 contact number</label>
+                            <input type="tel" placeholder="0900-000-000" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-colors">
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="group">
+                            <label class="text-xs font-bold text-gray-400 block mb-2">車牌號碼 license plate</label>
+                            <input type="text" placeholder="ABC-1234" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-colors uppercase">
+                        </div>
+                        <div class="group">
+                            <label class="text-xs font-bold text-gray-400 block mb-2">車型顏色 car color</label>
+                            <input type="text" placeholder="珍珠白" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-colors">
+                        </div>
+                        <div class="group">
+                            <label class="text-xs font-bold text-gray-400 block mb-2">型號 car model</label>
+                            <input type="text" placeholder="Model Y" class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-colors">
+                        </div>
+                    </div>
+
+                    <div class="group">
+                        <label class="text-xs font-bold text-gray-400 block mb-2">最在意的漆面問題 primary focus</label>
+                        <input type="text" placeholder="例如：水垢、亮度不足、容易髒..." class="w-full border-b-2 border-gray-100 py-3 focus:border-black outline-none transition-colors">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: 環境與歷史紀錄 -->
+            <div id="step2" class="step-content fade-in">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold border-l-4 border-black pl-4">環境與保養歷史 <span class="text-xs font-normal text-gray-400 ml-2">environment & history</span></h2>
+                </div>
+
+                <div class="space-y-10">
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 block mb-4">停車環境 parking type</label>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div class="option-card p-4 text-center text-sm font-medium" onclick="selectSingle(this, 'parking')">室外露天</div>
+                            <div class="option-card p-4 text-center text-sm font-medium" onclick="selectSingle(this, 'parking')">室內地下室</div>
+                            <div class="option-card p-4 text-center text-sm font-medium" onclick="selectSingle(this, 'parking')">遮雨棚/車庫</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 block mb-4">行駛環境 driving environment</label>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">城市道路</div>
+                            <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">工業區</div>
+                            <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">高速公路</div>
+                            <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">沿海地區</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 block mb-4">洗車頻率 wash frequency</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="option-card p-3 text-center text-xs font-medium" onclick="selectSingle(this, 'freq')">每週一次</div>
+                                <div class="option-card p-3 text-center text-xs font-medium" onclick="selectSingle(this, 'freq')">兩週一次</div>
+                                <div class="option-card p-3 text-center text-xs font-medium" onclick="selectSingle(this, 'freq')">每月一次</div>
+                                <div class="option-card p-3 text-center text-xs font-medium" onclick="selectSingle(this, 'freq')">不固定</div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-xs font-bold text-gray-400 block mb-4">鍍膜歷史 previous coating</label>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div class="option-card p-3 text-center text-xs font-medium" onclick="selectSingle(this, 'history')">一年內有</div>
+                                <div class="option-card p-3 text-center text-xs font-medium" onclick="selectSingle(this, 'history')">無 / 已失效</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 3: 漆膜厚度 -->
+            <div id="step3" class="step-content fade-in">
+                <div class="mb-8 flex justify-between items-end">
+                    <h2 class="text-xl font-bold border-l-4 border-black pl-4">漆膜厚度診斷 <span class="text-xs font-normal text-gray-400 ml-2">layer thickness (μm)</span></h2>
+                </div>
+
+                <div class="bg-black text-white p-8 rounded-sm mb-10 flex flex-col items-center justify-center">
+                    <span class="text-xs uppercase tracking-[0.3em] mb-2 opacity-60">全車平均厚度 average thickness</span>
+                    <div class="flex items-baseline">
+                        <span id="avg-thickness" class="text-6xl font-black italic">0.0</span>
+                        <span class="ml-2 text-sm font-light">μm</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 gap-1">
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">引擎蓋 hood</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="calculateAvgThickness()">
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">車頂 roof</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="calculateAvgThickness()">
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">左側車門 left door</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="calculateAvgThickness()">
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">右側車門 right door</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="calculateAvgThickness()">
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">車尾 trunk</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="calculateAvgThickness()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 4: 光澤度 (獨立一頁) -->
+            <div id="step4" class="step-content fade-in">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold border-l-4 border-black pl-4">光澤度測試 <span class="text-xs font-normal text-gray-400 ml-2">gloss test (gu)</span></h2>
+                </div>
+                
+                <div class="border-2 border-black p-8 text-center mb-10">
+                    <span id="avg-gloss" class="text-6xl font-black italic">0</span>
+                    <p class="text-[10px] font-bold text-gray-400 mt-2 tracking-widest uppercase">平均光澤度 average gloss units</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-1">
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">引擎蓋 hood</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="updateGloss()">
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">車頂 roof</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="updateGloss()">
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">左側車門 left door</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="updateGloss()">
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">右側車門 right door</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="updateGloss()">
+                    </div>
+                    <div class="flex items-center justify-between border-b border-gray-100 py-3">
+                        <span class="font-bold text-sm">車尾 trunk</span>
+                        <input type="number" value="0" class="w-24 text-right font-mono text-xl outline-none" onchange="updateGloss()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 5: 瑕疵與細節 -->
+            <div id="step5" class="step-content fade-in">
+                <div class="mb-8">
+                    <h2 class="text-xl font-bold border-l-4 border-black pl-4">瑕疵與細節檢核 <span class="text-xs font-normal text-gray-400 ml-2">defects & details</span></h2>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">太陽紋/螺旋紋</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">髮絲紋</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">輕度氧化</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">重度氧化</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">輕度水斑</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">重度水斑/水垢</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">飛漆</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">局部重噴</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">鳥屎印</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">樹汁</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">玻璃重油膜</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">輪框粉塵侵蝕</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">塑料件白化</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">金油層脆化</div>
+                    <div class="option-card p-3 text-center text-xs font-medium" onclick="selectMultiple(this)">深層鐵粉/柏油</div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="mt-20 flex items-center justify-between gap-4">
+                <button type="button" id="prevBtn" class="invisible flex-1 py-4 border border-black font-bold text-xs hover:bg-gray-50 transition-all uppercase" onclick="nextStep(-1)">上一步</button>
+                <button type="button" id="nextBtn" class="flex-[2] py-4 bg-black text-white font-bold text-xs hover:bg-gray-800 transition-all uppercase" onclick="nextStep(1)">下一步</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        function showModal(text) {
+            document.getElementById('modal-text').innerText = text;
+            document.getElementById('custom-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').style.display = 'none';
+        }
+
+        function updateUI() {
+            document.querySelectorAll('.step-content').forEach((step, idx) => {
+                step.classList.toggle('active', idx + 1 === currentStep);
+            });
+
+            document.getElementById('step-counter').innerText = `第 ${currentStep} / ${totalSteps} 步`;
+            document.getElementById('progress-line').style.width = `${(currentStep / totalSteps) * 100}%`;
+
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+
+            prevBtn.style.visibility = currentStep === 1 ? 'hidden' : 'visible';
+            nextBtn.innerText = currentStep === totalSteps ? '生成診斷報告' : '下一步';
+        }
+
+        function nextStep(n) {
+            if (currentStep + n > totalSteps) {
+                showModal("診斷數據已成功紀錄！\n\n建議方案：針對此漆面數據與環境風險，建議優先選用 [ ArtDeShine NGC+ 奈米石墨烯鍍膜 ] 以獲得最佳抗水斑與防護效果。");
+                return;
+            }
+            if (currentStep + n < 1) return;
+            currentStep += n;
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectSingle(btn, groupName) {
+            const parent = btn.parentNode;
+            parent.querySelectorAll('.option-card').forEach(b => {
+                b.classList.remove('selected');
+            });
+            btn.classList.add('selected');
+        }
+
+        function selectMultiple(btn) {
+            btn.classList.toggle('selected');
+        }
+
+        function calculateAvgThickness() {
+            const inputs = document.querySelectorAll('#step3 input[type="number"]');
+            let sum = 0;
+            inputs.forEach(i => sum += parseFloat(i.value || 0));
+            const avg = (sum / inputs.length).toFixed(1);
+            document.getElementById('avg-thickness').innerText = avg;
+        }
+
+        function updateGloss() {
+            const inputs = document.querySelectorAll('#step4 input[type="number"]');
+            let sum = 0;
+            inputs.forEach(i => sum += parseFloat(i.value || 0));
+            const avg = Math.round(sum / inputs.length);
+            document.getElementById('avg-gloss').innerText = avg;
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
